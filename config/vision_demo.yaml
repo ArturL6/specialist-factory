@@ -1,0 +1,19 @@
+task:
+  name: surface_condition
+  modality: image
+  classes:
+    - {name: scratch, description: "A product surface with a visible scratch or damage."}
+    - {name: clean, description: "A clean product surface without visible damage."}
+data_path: data/vision_demo.jsonl
+run_dir: runs/vision_demo
+cache_path: data/vision_teacher_cache.sqlite
+teachers:
+  - {id: mock_vision_a, type: mock, model_name: builtin/mock-vision-v1, weight: 1.0, modalities: [image], version: v2}
+  - {id: mock_vision_b, type: mock, model_name: builtin/mock-vision-v1, weight: 0.9, modalities: [image], version: v2}
+  # Production alternative: {id: hf_vision, type: huggingface_vision, model_name: openai/clip-vit-base-patch32, weight: 1.0, modalities: [image], version: v2}
+aggregation: {method: weighted_mean, min_teacher_agreement: 0.5, min_confidence: 0.55}
+student:
+  input_modalities: [image]
+  encoder: {type: tiny_vision, output_dim: 16}
+  head: {type: mlp, hidden_dim: 16, dropout: 0.1}
+training: {epochs: 30, batch_size: 12, learning_rate: 0.01, alpha_human: 1.0, beta_teacher: 1.0, distillation_temperature: 2.0, accelerator: cpu, seed: 7}
