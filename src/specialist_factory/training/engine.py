@@ -11,7 +11,7 @@ from torch.nn import functional as F
 from torch.utils.data import DataLoader, Dataset
 
 from ..config import read_jsonl
-from ..models import FeatureEncoder, MLPHead
+from ..models import FeatureEncoder, MLPHead, ModernBertLayaStudent
 from ..schemas import AggregatedLabel, AppConfig, Sample
 
 
@@ -41,11 +41,35 @@ class SpecialistModule(L.LightningModule):
     def __init__(self, config: AppConfig | dict):
         super().__init__()
         config = AppConfig.model_validate(config)
-        self.save_hyperparameters({"config": config.model_dump()}); self.config = config; self.encoder = FeatureEncoder(config.student)
-        head = config.student.head
-        self.head = MLPHead(self.encoder.output_dim, len(config.task.labels), hidden_dim=int(head.get("hidden_dim", 32)), dropout=float(head.get("dropout", .1)))
+        self.save_hyperparameters({"config": config.model_dump()})
+        self.config = config
+        encoder = config.student.encoder
+        self.decision_student = None
+        if encoder.get("type") == "modernbert":
+            if config.task.modality.value != "text":
+                raise ValueError("ModernBERT decision student supports text classification only")
+            self.decision_student = ModernBertLayaStudent(
+                str(encoder.get("model_name", "answerdotai/ModernBERT-base")),
+                config.task.classes,
+                max_length=int(encoder.get("max_length", 256)),
+                head_layers=int(config.student.head.get("layers", 1)),
+                dropout=float(config.student.head.get("dropout", 0.1)),
+                freeze_encoder=bool(encoder.get("freeze_encoder", True)),
+            )
+        else:
+            self.encoder = FeatureEncoder(config.student)
+            head = config.student.head
+            self.head = MLPHead(
+                self.encoder.output_dim,
+                len(config.task.labels),
+                hidden_dim=int(head.get("hidden_dim", 32)),
+                dropout=float(head.get("dropout", 0.1)),
+            )
 
-    def forward(self, samples: list[Sample]): return self.head(self.encoder(samples))
+    def forward(self, samples: list[Sample]):
+        if self.decision_student is not None:
+            return self.decision_student(samples)
+        return self.head(self.encoder(samples))
 
     def _loss(self, batch: Batch):
         logits = self(batch.samples); losses = []

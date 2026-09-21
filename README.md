@@ -28,7 +28,9 @@ python -m specialist_factory predict --checkpoint runs/text_demo/best.ckpt --tex
 
 Run the same sequence for `config/vision_demo.yaml` and `config/multimodal_demo.yaml`; `predict` accepts `--image path.png` and optionally `--text`.
 
-The demos use deterministic `mock` teachers so they are CPU-only and reproducible. Swap in the commented HF teacher configurations after installing `.[hf]`; model downloads are runtime dependencies. The external VLM adapter uses OpenRouter's documented [`/api/v1/chat/completions`](https://openrouter.ai/docs/api/reference/overview) request schema and JSON-object response format; it requires an environment key and deliberately stores its confidence as self-reported.
+The demos use deterministic `mock` teachers so they are CPU-only and reproducible. Swap in the commented HF teacher configurations after installing `.[hf]`; model downloads are runtime dependencies. Jev/ModernBERT profile: `config/modernbert_jev_demo.yaml` is configured to obtain real Jev `noul` class scores, cache the provenance-rich signals, and distill them into `answerdotai/ModernBERT-base` plus a Laya-inspired marker decision head. Export `TYPESAFE_API_KEY` (and optional `TYPESAFE_BASE_URL`) before annotation; the demo deliberately freezes the encoder on this CPU-only host and trains the decision head. Set `freeze_encoder: false` only on a machine with sufficient accelerator memory.
+
+The external VLM adapter uses OpenRouter's documented [`/api/v1/chat/completions`](https://openrouter.ai/docs/api/reference/overview) request schema and JSON-object response format; it requires an environment key and deliberately stores its confidence as self-reported.
 
 ## Limits
 

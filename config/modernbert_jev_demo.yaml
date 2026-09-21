@@ -1,0 +1,43 @@
+task:
+  name: ecommerce_intent_jev_distillation
+  modality: text
+  classes:
+    - {name: order_status, description: "The user asks about the status of an existing order."}
+    - {name: cancel_order, description: "The user wants to cancel an order."}
+    - {name: refund, description: "The user wants their money back."}
+    - {name: other, description: "None of the other classes applies."}
+data_path: data/modernbert_jev_demo.jsonl
+run_dir: runs/modernbert_jev_demo
+cache_path: data/modernbert_jev_teacher_cache.sqlite
+teachers:
+  - id: jev
+    type: jev
+    model: jev-1.13
+    api_key_env: TYPESAFE_API_KEY
+    weight: 1.0
+    modalities: [text]
+    version: systemone-noul-v1
+aggregation:
+  method: weighted_mean
+  min_teacher_agreement: 0.0
+  min_confidence: 0.0
+student:
+  input_modalities: [text]
+  encoder:
+    type: modernbert
+    model_name: answerdotai/ModernBERT-base
+    max_length: 256
+    freeze_encoder: true
+  head:
+    type: laya_style_marker_decision
+    layers: 1
+    dropout: 0.1
+training:
+  epochs: 2
+  batch_size: 4
+  learning_rate: 0.0001
+  alpha_human: 1.0
+  beta_teacher: 1.0
+  distillation_temperature: 2.0
+  accelerator: cpu
+  seed: 17

@@ -91,6 +91,85 @@ class HuggingFaceVisionTeacher:
         return output
 
 
+class JevTeacher:
+    """TypeSafe Jev NOUL adapter; every class gets the same evidence and a binary decision."""
+
+    def __init__(self, cfg: TeacherConfig):
+        self.cfg, self.teacher_id = cfg, cfg.id
+
+    def predict(self, samples: list[Sample], task: TaskDefinition) -> list[TeacherSignal]:
+        key = os.getenv(self.cfg.api_key_env or "TYPESAFE_API_KEY")
+        if not key:
+            raise RuntimeError("Jev key missing; set the configured api_key_env")
+        base = self.cfg.base_url or os.getenv("TYPESAFE_BASE_URL", "https://openrouter.ai/api")
+        url = base.rstrip("/") + "/v1/systemone"
+        output: list[TeacherSignal] = []
+        for sample in samples:
+            if not sample.text:
+                continue
+            questions = {
+                item.name: {
+                    "type": "noul",
+                    "instructions": (
+                        f"Does the request match exactly this intent? {item.description} "
+                        "Answer from the request only; do not infer an unstated intent."
+                    ),
+                }
+                for item in task.classes
+            }
+            payload = {
+                "model": self.cfg.model or self.cfg.model_name or "jev-1.13",
+                "state": {"request": sample.text, "metadata": sample.metadata},
+                "questions": questions,
+            }
+            started = time.perf_counter()
+            last_error: Exception | None = None
+            for attempt in range(4):
+                try:
+                    response = requests.post(
+                        url,
+                        headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"},
+                        json=payload,
+                        timeout=60,
+                    )
+                    if response.status_code in {429, 500, 502, 503, 504} and attempt < 3:
+                        time.sleep(2**attempt)
+                        continue
+                    response.raise_for_status()
+                    raw = response.json()
+                    probabilities = {label: float(raw["answers"][label]["noul"]) for label in task.labels}
+                    output.append(
+                        _signal(
+                            sample,
+                            self.cfg,
+                            probabilities,
+                            SignalType.MODEL_PROBABILITY,
+                            latency_ms=round((time.perf_counter() - started) * 1000, 2),
+                            cost=float(raw.get("usage", {}).get("cost", 0) or 0),
+                            input_tokens=int(raw.get("usage", {}).get("input_tokens", 0) or 0),
+                            provider=raw.get("provider", "unknown"),
+                            served_model=raw.get("model", self.cfg.model or self.cfg.model_name),
+                            model_revision=self.cfg.version,
+                            decision_type="noul",
+                        )
+                    )
+                    break
+                except requests.HTTPError as exc:
+                    last_error = exc
+                    status = exc.response.status_code if exc.response is not None else 0
+                    if status not in {429, 500, 502, 503, 504} or attempt == 3:
+                        raise RuntimeError(f"Jev request failed with HTTP {status}") from exc
+                    time.sleep(2**attempt)
+                except requests.RequestException as exc:
+                    last_error = exc
+                    if attempt == 3:
+                        raise RuntimeError("Jev request failed after four attempts") from exc
+                    time.sleep(2**attempt)
+            else:
+                raise RuntimeError("Jev did not return a response") from last_error
+        return output
+
+
 class OpenRouterVisionTeacher:
     """Documented OpenRouter chat-completions adapter. Self-reported confidence stays distinct."""
     def __init__(self, cfg: TeacherConfig): self.cfg, self.teacher_id = cfg, cfg.id
@@ -120,6 +199,12 @@ class OpenRouterVisionTeacher:
 
 
 def build_teacher(cfg: TeacherConfig):
-    types = {"mock": MockTeacher, "huggingface_text": HuggingFaceTextTeacher, "huggingface_vision": HuggingFaceVisionTeacher, "openrouter_vision": OpenRouterVisionTeacher}
+    types = {
+        "mock": MockTeacher,
+        "huggingface_text": HuggingFaceTextTeacher,
+        "huggingface_vision": HuggingFaceVisionTeacher,
+        "jev": JevTeacher,
+        "openrouter_vision": OpenRouterVisionTeacher,
+    }
     if cfg.type not in types: raise ValueError(f"Unsupported teacher type: {cfg.type}")
     return types[cfg.type](cfg)
