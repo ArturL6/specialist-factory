@@ -9,7 +9,7 @@ A compact Python POC that turns partially labeled text, image, and image-text sa
 - **Provenance:** each cached teacher signal stores model, source/version, latency, cost, signal type, and request-derived cache key.
 - **Aggregation:** weighted mean, log-probability mean, or majority voting, with agreement/confidence/entropy thresholds and abstention.
 - **Students:** small local hashed-text and image-stat encoders, explicit late fusion for multimodal data, MLP head, and Lightning soft-label distillation plus human cross entropy.
-- **Evaluation:** separate human-label accuracy, student/teacher agreement, and teacher abstention rate.
+- **Evaluation:** human-label accuracy, student/teacher agreement, and teacher abstention rate, computed on the held-out validation split (same 80/20 seeded split used during training) so metrics never include training data.
 
 `self_reported_probability` is preserved as a separate signal type and is not treated as calibrated likelihood.
 
@@ -18,6 +18,9 @@ A compact Python POC that turns partially labeled text, image, and image-text sa
 ```bash
 uv venv .venv --python 3.11
 uv pip install --python .venv/bin/python -e '.[dev]'
+
+ruff check src tests
+ruff format --check src tests
 
 python -m specialist_factory generate --config config/text_demo.yaml
 python -m specialist_factory annotate --config config/text_demo.yaml

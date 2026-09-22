@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-from enum import Enum
+from enum import StrEnum
 from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
 
-class Modality(str, Enum):
+class Modality(StrEnum):
     TEXT = "text"
     IMAGE = "image"
     MULTIMODAL = "multimodal"
 
 
-class SignalType(str, Enum):
+class SignalType(StrEnum):
     MODEL_PROBABILITY = "model_probability"
     SELF_REPORTED_PROBABILITY = "self_reported_probability"
     HARD_LABEL = "hard_label"

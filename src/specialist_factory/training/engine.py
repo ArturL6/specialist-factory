@@ -24,17 +24,39 @@ class Batch:
 
 
 class SpecialistDataset(Dataset):
-    def __init__(self, samples: list[Sample], labels: dict[str, AggregatedLabel], class_names: list[str]): self.samples, self.labels, self.class_names = samples, labels, class_names
-    def __len__(self): return len(self.samples)
+    def __init__(self, samples: list[Sample], labels: dict[str, AggregatedLabel], class_names: list[str]):
+        self.samples, self.labels, self.class_names = samples, labels, class_names
+
+    def __len__(self):
+        return len(self.samples)
+
     def __getitem__(self, index):
-        sample = self.samples[index]; aggregate = self.labels.get(sample.id); human = self.class_names.index(sample.human_label) if sample.human_label in self.class_names else -1
-        probs = [aggregate.probabilities[name] for name in self.class_names] if aggregate and not aggregate.abstained else [0.0] * len(self.class_names)
+        sample = self.samples[index]
+        aggregate = self.labels.get(sample.id)
+        human = self.class_names.index(sample.human_label) if sample.human_label in self.class_names else -1
+        probs = (
+            [aggregate.probabilities[name] for name in self.class_names]
+            if aggregate and not aggregate.abstained
+            else [0.0] * len(self.class_names)
+        )
         return sample, human, probs, int(bool(aggregate and not aggregate.abstained))
 
 
+def split_samples(samples: list[Sample], seed: int) -> tuple[list[Sample], list[Sample]]:
+    shuffled = list(samples)
+    random.Random(seed).shuffle(shuffled)
+    cut = max(1, int(0.8 * len(shuffled)))
+    return shuffled[:cut], shuffled[cut:]
+
+
 def collate(rows) -> Batch:
-    samples, human, teacher, mask = zip(*rows)
-    return Batch(list(samples), torch.tensor(human), torch.tensor(teacher, dtype=torch.float32), torch.tensor(mask, dtype=torch.bool))
+    samples, human, teacher, mask = zip(*rows, strict=False)
+    return Batch(
+        list(samples),
+        torch.tensor(human),
+        torch.tensor(teacher, dtype=torch.float32),
+        torch.tensor(mask, dtype=torch.bool),
+    )
 
 
 class SpecialistModule(L.LightningModule):
@@ -72,20 +94,33 @@ class SpecialistModule(L.LightningModule):
         return self.head(self.encoder(samples))
 
     def _loss(self, batch: Batch):
-        logits = self(batch.samples); losses = []
+        logits = self(batch.samples)
+        losses = []
         valid = batch.human >= 0
-        if valid.any(): losses.append(self.config.training.alpha_human * F.cross_entropy(logits[valid], batch.human[valid]))
+        if valid.any():
+            losses.append(self.config.training.alpha_human * F.cross_entropy(logits[valid], batch.human[valid]))
         if batch.teacher_mask.any():
             temperature = self.config.training.distillation_temperature
             soft = F.log_softmax(logits[batch.teacher_mask] / temperature, dim=-1)
-            losses.append(self.config.training.beta_teacher * F.kl_div(soft, batch.teacher[batch.teacher_mask], reduction="batchmean") * temperature**2)
+            losses.append(
+                self.config.training.beta_teacher
+                * F.kl_div(soft, batch.teacher[batch.teacher_mask], reduction="batchmean")
+                * temperature**2
+            )
         return sum(losses) if losses else logits.sum() * 0
 
     def training_step(self, batch, _):
-        loss = self._loss(batch); self.log("train_loss", loss, prog_bar=True); return loss
+        loss = self._loss(batch)
+        self.log("train_loss", loss, prog_bar=True)
+        return loss
+
     def validation_step(self, batch, _):
-        loss = self._loss(batch); self.log("val_loss", loss, prog_bar=True); return loss
-    def configure_optimizers(self): return torch.optim.AdamW(self.parameters(), lr=self.config.training.learning_rate)
+        loss = self._loss(batch)
+        self.log("val_loss", loss, prog_bar=True)
+        return loss
+
+    def configure_optimizers(self):
+        return torch.optim.AdamW(self.parameters(), lr=self.config.training.learning_rate)
 
 
 def train(config: AppConfig) -> Path:
@@ -93,15 +128,22 @@ def train(config: AppConfig) -> Path:
     samples = read_jsonl(config.data_path)
     annotations = Path(config.run_dir, "aggregated_labels.jsonl")
     labels = (
-        {item.sample_id: item for item in (AggregatedLabel.model_validate_json(row) for row in annotations.read_text().splitlines())}
+        {
+            item.sample_id: item
+            for item in (AggregatedLabel.model_validate_json(row) for row in annotations.read_text().splitlines())
+        }
         if annotations.exists()
         else {}
     )
-    random.Random(config.training.seed).shuffle(samples); cut = max(1, int(.8 * len(samples))); train_data = SpecialistDataset(samples[:cut], labels, config.task.labels); validation_data = SpecialistDataset(samples[cut:], labels, config.task.labels)
+    train_samples, validation_samples = split_samples(samples, config.training.seed)
+    train_data = SpecialistDataset(train_samples, labels, config.task.labels)
+    validation_data = SpecialistDataset(validation_samples, labels, config.task.labels)
     module = SpecialistModule(config)
     run = Path(config.run_dir)
     logger = L.pytorch.loggers.CSVLogger(save_dir=str(run), name="tracking")
-    ckpt = L.pytorch.callbacks.ModelCheckpoint(dirpath=run, filename="best", monitor="val_loss", mode="min", save_top_k=1)
+    ckpt = L.pytorch.callbacks.ModelCheckpoint(
+        dirpath=run, filename="best", monitor="val_loss", mode="min", save_top_k=1
+    )
     trainer = L.Trainer(
         max_epochs=config.training.epochs,
         accelerator=config.training.accelerator,
@@ -113,9 +155,24 @@ def train(config: AppConfig) -> Path:
         deterministic=True,
         enable_model_summary=False,
     )
-    trainer.fit(module, DataLoader(train_data, batch_size=config.training.batch_size, shuffle=True, collate_fn=collate), DataLoader(validation_data, batch_size=config.training.batch_size, collate_fn=collate))
+    trainer.fit(
+        module,
+        DataLoader(train_data, batch_size=config.training.batch_size, shuffle=True, collate_fn=collate),
+        DataLoader(validation_data, batch_size=config.training.batch_size, collate_fn=collate),
+    )
     checkpoint = Path(ckpt.best_model_path)
-    (run / "training_manifest.json").write_text(json.dumps({"checkpoint": str(checkpoint), "tracking_dir": logger.log_dir, "labels": config.task.labels, "student": config.student.model_dump(), "task": config.task.model_dump()}, indent=2))
+    (run / "training_manifest.json").write_text(
+        json.dumps(
+            {
+                "checkpoint": str(checkpoint),
+                "tracking_dir": logger.log_dir,
+                "labels": config.task.labels,
+                "student": config.student.model_dump(),
+                "task": config.task.model_dump(),
+            },
+            indent=2,
+        )
+    )
     return checkpoint
 
 
@@ -125,6 +182,16 @@ def load_student(checkpoint: str | Path) -> SpecialistModule:
 
 def predict(module: SpecialistModule, samples: list[Sample]) -> list[dict]:
     module.eval()
-    with torch.no_grad(): probabilities = torch.softmax(module(samples), dim=-1).tolist()
+    with torch.no_grad():
+        probabilities = torch.softmax(module(samples), dim=-1).tolist()
     labels = module.config.task.labels
-    return [{"sample_id": sample.id, "probabilities": dict(zip(labels, row)), "predicted_label": labels[max(range(len(row)), key=row.__getitem__)], "confidence": max(row), "teacher_dependency": False} for sample, row in zip(samples, probabilities)]
+    return [
+        {
+            "sample_id": sample.id,
+            "probabilities": dict(zip(labels, row, strict=False)),
+            "predicted_label": labels[max(range(len(row)), key=row.__getitem__)],
+            "confidence": max(row),
+            "teacher_dependency": False,
+        }
+        for sample, row in zip(samples, probabilities, strict=False)
+    ]
