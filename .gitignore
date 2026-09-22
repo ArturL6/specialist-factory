@@ -6,6 +6,9 @@ __pycache__/
 data/*.jsonl
 data/*.sqlite
 data/images/
+!data/*.jsonl
+!data/images/
+!data/images/*.png
 runs/
 *.egg-info/
 .env
