@@ -1,4 +1,5 @@
 """Teacher implementations and factory."""
+
 from .base import Teacher
 from .implementations import (
     HuggingFaceTextTeacher,

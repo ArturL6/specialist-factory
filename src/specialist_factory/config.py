@@ -23,4 +23,6 @@ def read_jsonl(path: str | Path) -> list[Sample]:
 def write_jsonl(path: str | Path, rows: list[Sample] | list[dict]) -> None:
     destination = Path(path)
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text("".join(json.dumps(row.model_dump() if hasattr(row, "model_dump") else row) + "\n" for row in rows))
+    destination.write_text(
+        "".join(json.dumps(row.model_dump() if hasattr(row, "model_dump") else row) + "\n" for row in rows)
+    )

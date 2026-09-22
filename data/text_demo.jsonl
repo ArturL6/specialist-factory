@@ -1,30 +1,48 @@
-{"id": "sample-000", "text": "Track order number 17", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-001", "text": "Please cancel my order", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-002", "text": "Please issue a refund", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-003", "text": "Do you sell gift cards?", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-004", "text": "Where is my package?", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-005", "text": "Please cancel my order", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-006", "text": "The item arrived broken; return my payment", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-007", "text": "What are your opening hours?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-008", "text": "Track order number 17", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-009", "text": "Stop shipment immediately", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-010", "text": "I want my money back", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-011", "text": "Do you sell gift cards?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-012", "text": "Where is my package?", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-013", "text": "Please cancel my order", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-014", "text": "I want my money back", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-015", "text": "Can I change my account email?", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-016", "text": "Track order number 17", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-017", "text": "Please cancel my order", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-018", "text": "I want my money back", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-019", "text": "What are your opening hours?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-020", "text": "My delivery has not arrived", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-021", "text": "I ordered by mistake, cancel it", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-022", "text": "I want my money back", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-023", "text": "Do you sell gift cards?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-024", "text": "Where is my package?", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-025", "text": "Please cancel my order", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-026", "text": "The item arrived broken; return my payment", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-027", "text": "Do you sell gift cards?", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-028", "text": "My delivery has not arrived", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
-{"id": "sample-029", "text": "Please cancel my order", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1"}}
+{"id": "sample-000", "text": "Track order number 17", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-001", "text": "I ordered by mistake, cancel it", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-002", "text": "I want my money back", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-003", "text": "What are your opening hours?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-004", "text": "Where is my package?", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-005", "text": "Please cancel my order", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-006", "text": "Please issue a refund", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-007", "text": "What are your opening hours?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-008", "text": "Track order number 17", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-009", "text": "Stop shipment immediately", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-010", "text": "I want my money back", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-011", "text": "Do you sell gift cards?", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-012", "text": "My delivery has not arrived", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-013", "text": "Please cancel my order", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-014", "text": "I want my money back", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-015", "text": "What are your opening hours?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-016", "text": "Where is my package?", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-017", "text": "Stop shipment immediately", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-018", "text": "The item arrived broken; return my payment", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-019", "text": "Do you sell gift cards?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-020", "text": "Where is my package?", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-021", "text": "Stop shipment immediately", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-022", "text": "The item arrived broken; return my payment", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-023", "text": "What are your opening hours?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-024", "text": "My delivery has not arrived", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-025", "text": "I ordered by mistake, cancel it", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-026", "text": "Please issue a refund", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-027", "text": "What are your opening hours?", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-028", "text": "My delivery has not arrived", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-029", "text": "Please cancel my order", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-030", "text": "The item arrived broken; return my payment", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-031", "text": "Can I change my account email?", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-032", "text": "Track order number 17", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-033", "text": "Please cancel my order", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-034", "text": "Please issue a refund", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-035", "text": "Can I change my account email?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-036", "text": "Track order number 17", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-037", "text": "Stop shipment immediately", "image": null, "human_label": "cancel_order", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-038", "text": "The item arrived broken; return my payment", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-039", "text": "Can I change my account email?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-040", "text": "Track order number 17", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-041", "text": "Stop shipment immediately", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-042", "text": "I want my money back", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-043", "text": "Can I change my account email?", "image": null, "human_label": "other", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-044", "text": "My delivery has not arrived", "image": null, "human_label": "order_status", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-045", "text": "Stop shipment immediately", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}
+{"id": "sample-046", "text": "The item arrived broken; return my payment", "image": null, "human_label": "refund", "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy"}}
+{"id": "sample-047", "text": "Do you sell gift cards?", "image": null, "human_label": null, "metadata": {"synthetic": true, "generator": "builtin-v1", "label_source": "unlabeled"}}

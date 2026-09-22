@@ -25,12 +25,29 @@ class TeacherCache:
         self.conn.commit()
 
     def key(self, sample: Sample, task: TaskDefinition, teacher: TeacherConfig) -> str:
-        return stable_hash({"sample": sample.model_dump(), "task": task.model_dump(), "teacher": teacher.model_dump()})
+        # weight/modalities are aggregation/routing knobs, not request inputs; excluding them
+        # keeps a weight or routing tweak from invalidating (and re-billing) every cached signal.
+        teacher_fields = teacher.model_dump(exclude={"weight", "modalities"})
+        return stable_hash({"sample": sample.model_dump(), "task": task.model_dump(), "teacher": teacher_fields})
 
     def get(self, key: str) -> TeacherSignal | None:
-        row = self.conn.execute("SELECT signal_json FROM teacher_cache WHERE cache_key=? AND error IS NULL", (key,)).fetchone()
+        row = self.conn.execute(
+            "SELECT signal_json FROM teacher_cache WHERE cache_key=? AND error IS NULL", (key,)
+        ).fetchone()
         return TeacherSignal.model_validate_json(row[0]) if row else None
 
-    def put(self, key: str, signal: TeacherSignal | None, *, latency_ms: float = 0, cost: float = 0, error: str | None = None, attempts: int = 1) -> None:
-        self.conn.execute("INSERT OR REPLACE INTO teacher_cache VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)", (key, signal.model_dump_json() if signal else None, latency_ms, cost, error, attempts))
+    def put(
+        self,
+        key: str,
+        signal: TeacherSignal | None,
+        *,
+        latency_ms: float = 0,
+        cost: float = 0,
+        error: str | None = None,
+        attempts: int = 1,
+    ) -> None:
+        self.conn.execute(
+            "INSERT OR REPLACE INTO teacher_cache VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)",
+            (key, signal.model_dump_json() if signal else None, latency_ms, cost, error, attempts),
+        )
         self.conn.commit()
