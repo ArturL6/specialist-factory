@@ -34,8 +34,10 @@ def generate(config: AppConfig, count: int = 48) -> list[Sample]:
             draw.rectangle((12, 12, 84, 84), fill=color)
             if tag in ("scratch", "damage"): draw.line((20, 20, 76, 76), fill="black", width=7)
             draw.text((5, 5), label[:8], fill="black"); canvas.save(image)
-        # keep a deterministic partly-unlabeled split; humans remain separate from teacher labels
-        human = label if index % 3 != 0 else None
-        samples.append(Sample(id=f"sample-{index:03d}", text=text, image=image, human_label=human, metadata={"synthetic": True, "generator": "builtin-v1"}))
+        # Synthetic gold is explicitly marked as such; it must never be presented as a human annotation.
+        labeled_fraction = float(config.generator.get("synthetic_human_label_rate", 2 / 3))
+        human = label if rng.random() < labeled_fraction else None
+        metadata = {"synthetic": True, "generator": "builtin-v1", "label_source": "synthetic_gold_proxy" if human else "unlabeled"}
+        samples.append(Sample(id=f"sample-{index:03d}", text=text, image=image, human_label=human, metadata=metadata))
     write_jsonl(data_path, samples)
     return samples

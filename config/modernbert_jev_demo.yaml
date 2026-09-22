@@ -32,6 +32,8 @@ student:
     type: laya_style_marker_decision
     layers: 1
     dropout: 0.1
+generator:
+  synthetic_human_label_rate: 1.0
 training:
   epochs: 2
   batch_size: 4

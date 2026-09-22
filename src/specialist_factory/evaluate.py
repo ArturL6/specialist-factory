@@ -10,7 +10,11 @@ from .training.engine import load_student, predict
 
 
 def evaluate(config: AppConfig, checkpoint: str) -> dict:
-    module = load_student(checkpoint); samples = read_jsonl(config.data_path); _signals, aggregated = load_annotations(config); output = predict(module, samples)
+    module = load_student(checkpoint)
+    samples = read_jsonl(config.data_path)
+    annotations = Path(config.run_dir, "aggregated_labels.jsonl")
+    _signals, aggregated = load_annotations(config) if annotations.exists() else ([], {})
+    output = predict(module, samples)
     by_id = {row["sample_id"]: row for row in output}; human = [sample for sample in samples if sample.human_label]
     human_accuracy = sum(by_id[sample.id]["predicted_label"] == sample.human_label for sample in human) / len(human) if human else None
     accepted = [item for item in aggregated.values() if not item.abstained]

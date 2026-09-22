@@ -91,14 +91,28 @@ class SpecialistModule(L.LightningModule):
 def train(config: AppConfig) -> Path:
     L.seed_everything(config.training.seed, workers=True)
     samples = read_jsonl(config.data_path)
-    rows = Path(config.run_dir, "aggregated_labels.jsonl").read_text().splitlines()
-    labels = {item.sample_id: item for item in (AggregatedLabel.model_validate_json(row) for row in rows)}
+    annotations = Path(config.run_dir, "aggregated_labels.jsonl")
+    labels = (
+        {item.sample_id: item for item in (AggregatedLabel.model_validate_json(row) for row in annotations.read_text().splitlines())}
+        if annotations.exists()
+        else {}
+    )
     random.Random(config.training.seed).shuffle(samples); cut = max(1, int(.8 * len(samples))); train_data = SpecialistDataset(samples[:cut], labels, config.task.labels); validation_data = SpecialistDataset(samples[cut:], labels, config.task.labels)
     module = SpecialistModule(config)
     run = Path(config.run_dir)
     logger = L.pytorch.loggers.CSVLogger(save_dir=str(run), name="tracking")
     ckpt = L.pytorch.callbacks.ModelCheckpoint(dirpath=run, filename="best", monitor="val_loss", mode="min", save_top_k=1)
-    trainer = L.Trainer(max_epochs=config.training.epochs, accelerator=config.training.accelerator, devices=1, logger=logger, enable_progress_bar=False, callbacks=[ckpt], deterministic=True, enable_model_summary=False)
+    trainer = L.Trainer(
+        max_epochs=config.training.epochs,
+        accelerator=config.training.accelerator,
+        devices=1,
+        logger=logger,
+        log_every_n_steps=1,
+        enable_progress_bar=False,
+        callbacks=[ckpt],
+        deterministic=True,
+        enable_model_summary=False,
+    )
     trainer.fit(module, DataLoader(train_data, batch_size=config.training.batch_size, shuffle=True, collate_fn=collate), DataLoader(validation_data, batch_size=config.training.batch_size, collate_fn=collate))
     checkpoint = Path(ckpt.best_model_path)
     (run / "training_manifest.json").write_text(json.dumps({"checkpoint": str(checkpoint), "tracking_dir": logger.log_dir, "labels": config.task.labels, "student": config.student.model_dump(), "task": config.task.model_dump()}, indent=2))
